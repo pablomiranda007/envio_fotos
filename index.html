@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enviar Fotos</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 40px; text-align: center; }
+    .box { background: white; padding: 25px; border-radius: 10px; max-width: 400px; margin: auto;
+           box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    input[type=file] { margin: 20px 0; }
+    button { background: #0b57d0; color: white; border: none; padding: 12px 25px;
+             border-radius: 8px; cursor: pointer; font-size: 16px; }
+    button:hover { background: #074db4; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Enviar foto</h2>
+    <input type="file" id="fileInput" accept="image/*">
+    <br>
+    <button onclick="upload()">Enviar</button>
+    <p id="msg"></p>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzJmUuctZ4FWw-nPbbr8CWcDZdCsoar0HKnnK__ghEs_w5lEaMzTID-LS6oI8CX40Ai/exec";
+
+    async function upload() {
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) { alert("Escolha uma foto primeiro!"); return; }
+
+      document.getElementById("msg").innerHTML = "Enviando...";
+
+      const reader = new FileReader();
+      reader.onload = async function () {
+        const base64 = reader.result.split(",")[1];
+
+        const formData = new URLSearchParams();
+        formData.append("filename", file.name);
+        formData.append("mimetype", file.type);
+        formData.append("data", base64);
+
+        const response = await fetch(API_URL, { method: "POST", body: formData });
+        const result = await response.json();
+
+        if (result.status === "OK") {
+          document.getElementById("msg").innerHTML = "Foto enviada com sucesso!";
+        } else {
+          document.getElementById("msg").innerHTML = "Erro ao enviar.";
+        }
+      };
+
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
